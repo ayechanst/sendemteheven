@@ -22,8 +22,7 @@ fn spawn_light(mut commands: Commands) {
 
 fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(10.0, 10.0, 10.0) // Elevated and angled
-            .looking_at(Vec3::ZERO, Vec3::Y), // Look at the origin
+        transform: Transform::from_xyz(10.0, 10.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 }
