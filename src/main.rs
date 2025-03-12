@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use plugins::world::WorldPlugin;
+use plugins::{player::PlayerPlugin, world::WorldPlugin};
 use systems::spawn_tile::spawn_tile;
 
 mod plugins;
@@ -10,10 +10,22 @@ mod systems;
 
 fn main() {
     App::new()
-        // .insert_resource(ClearColor(CLEAR))
         .add_plugins(DefaultPlugins)
+        .add_systems(Startup, setup)
         .add_plugins(WorldInspectorPlugin::new())
-        .add_plugins(WorldPlugin)
-        .add_systems(Startup, spawn_tile)
+        // .add_plugins(WorldPlugin)
+        // .add_plugins(PlayerPlugin)
+        // .add_systems(Startup, spawn_tile)
         .run();
+}
+
+fn setup(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
+    commands.spawn(SpriteBundle {
+        sprite: Sprite {
+            custom_size: Some(Vec2::new(100.0, 100.0)),
+            ..default()
+        },
+        ..default()
+    });
 }
