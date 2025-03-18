@@ -1,16 +1,12 @@
 use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy_ecs_tiled::prelude::*;
+use bevy_ecs_tiled::TiledMapPlugin;
+use bevy_ecs_tilemap::TilemapPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use plugins::{
-    // player::{Player, PlayerPlugin},
-    player::Player,
-    world::WorldPlugin,
-};
-use systems::spawn_tile::spawn_tile;
+use plugins::player::Player;
 
 mod plugins;
 mod systems;
-
-// pub const CLEAR: Color = Color::rgb(0.1, 0.1, 0.1);
 
 fn main() {
     App::new()
@@ -30,22 +26,22 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(Update, character_movement)
         .add_plugins(WorldInspectorPlugin::new())
-        // .add_plugins(WorldPlugin)
-        // .add_plugins(PlayerPlugin)
-        // .add_systems(Startup, spawn_tile)
+        .add_plugins(TilemapPlugin)
+        .add_plugins(TiledMapPlugin::default())
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut camera = Camera2dBundle::default();
+    let texture = asset_server.load("assassino.png");
+    let map_handle: Handle<TiledMap> = asset_server.load("test-tilemap.tmx");
+
     camera.projection.scaling_mode = ScalingMode::AutoMin {
         min_width: 256.0,
         min_height: 144.0,
     };
+
     commands.spawn(camera);
-
-    let texture = asset_server.load("assassino.png");
-
     commands.spawn((
         SpriteBundle {
             texture,
@@ -53,6 +49,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Player { speed: 100.0 },
     ));
+    commands.spawn(TiledMapHandle(map_handle));
 }
 
 fn character_movement(
