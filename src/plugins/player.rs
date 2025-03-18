@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
-// pub struct PlayerPlugin;
+pub struct PlayerPlugin;
 
-// impl Plugin for PlayerPlugin {
-//     fn build(&self, app: &mut App) {
-//         app.add_systems(Startup, spawn_player)
-//         // .add_systems(Update, player_movement);
-//     }
-// }
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_player)
+            .add_systems(Update, character_movement);
+    }
+}
 
 #[derive(Component)]
 pub struct Player {
@@ -16,6 +16,39 @@ pub struct Player {
 
 // #[derive(Component)]
 // struct Speed(f32);
+
+fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let texture = asset_server.load("assassino.png");
+    commands.spawn((
+        SpriteBundle {
+            texture,
+            ..default()
+        },
+        Player { speed: 100.0 },
+    ));
+}
+
+fn character_movement(
+    mut characters: Query<(&mut Transform, &Player)>,
+    input: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+) {
+    for (mut transform, player) in &mut characters {
+        let movement_amount = player.speed * time.delta_seconds();
+        if input.pressed(KeyCode::KeyW) {
+            transform.translation.y += movement_amount;
+        }
+        if input.pressed(KeyCode::KeyS) {
+            transform.translation.y -= movement_amount;
+        }
+        if input.pressed(KeyCode::KeyD) {
+            transform.translation.x += movement_amount;
+        }
+        if input.pressed(KeyCode::KeyA) {
+            transform.translation.x -= movement_amount;
+        }
+    }
+}
 
 // fn player_movement(
 //     keys: Res<ButtonInput<KeyCode>>,

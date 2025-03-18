@@ -3,7 +3,7 @@ use bevy_ecs_tiled::prelude::*;
 use bevy_ecs_tiled::TiledMapPlugin;
 use bevy_ecs_tilemap::TilemapPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use plugins::player::Player;
+use plugins::player::PlayerPlugin;
 
 mod plugins;
 mod systems;
@@ -23,18 +23,29 @@ fn main() {
                 })
                 .build(),
         )
-        .add_systems(Startup, setup)
-        .add_systems(Update, character_movement)
-        .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(TilemapPlugin)
         .add_plugins(TiledMapPlugin::default())
+        .add_plugins(WorldInspectorPlugin::new())
+        .add_plugins(PlayerPlugin)
+        .add_systems(Startup, setup)
+        .add_systems(Update, spawn_loaded_map)
         .run();
 }
 
+#[derive(Component)]
+struct PendingMap;
+
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut camera = Camera2dBundle::default();
-    let texture = asset_server.load("assassino.png");
     let map_handle: Handle<TiledMap> = asset_server.load("test-tilemap.tmx");
+    let light = PointLightBundle {
+        point_light: PointLight {
+            intensity: 3500.0,
+            ..default()
+        },
+        transform: Transform::from_xyz(0.0, 0.5, 0.0),
+        ..default()
+    };
 
     camera.projection.scaling_mode = ScalingMode::AutoMin {
         min_width: 256.0,
@@ -42,34 +53,33 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     };
 
     commands.spawn(camera);
+    println!("map about to spawn");
     commands.spawn((
-        SpriteBundle {
-            texture,
-            ..default()
-        },
-        Player { speed: 100.0 },
+        TiledMapHandle(map_handle),
+        PendingMap,
+        Transform::from_xyz(0.0, 0.0, -1.0),
     ));
-    commands.spawn(TiledMapHandle(map_handle));
+    println!("the map spawned i guess?");
+    commands.spawn(light);
 }
 
-fn character_movement(
-    mut characters: Query<(&mut Transform, &Player)>,
-    input: Res<ButtonInput<KeyCode>>,
-    time: Res<Time>,
+fn spawn_loaded_map(
+    mut commands: Commands,
+    tiled_maps: Res<Assets<TiledMap>>,
+    query: Query<(Entity, &Handle<TiledMap>), With<PendingMap>>,
 ) {
-    for (mut transform, player) in &mut characters {
-        let movement_amount = player.speed * time.delta_seconds();
-        if input.pressed(KeyCode::KeyW) {
-            transform.translation.y += movement_amount;
-        }
-        if input.pressed(KeyCode::KeyS) {
-            transform.translation.y -= movement_amount;
-        }
-        if input.pressed(KeyCode::KeyD) {
-            transform.translation.x += movement_amount;
-        }
-        if input.pressed(KeyCode::KeyA) {
-            transform.translation.x -= movement_amount;
+    for (entity, map_handle) in query.iter() {
+        if tiled_maps.contains(map_handle) {
+            commands.entity(entity).remove::<PendingMap>(); // Remove the tag
+            println!("Map successfully spawned!");
         }
     }
 }
+
+// fn check_map_ready(tiled_maps: Res<Assets<TiledMap>>, query: Query<(Entity, &Handle<TiledMap>)>) {
+//     for (entity, map_handle) in query.iter() {
+//         if tiled_maps.contains(map_handle) {
+//             println!("Map loaded successfully!");
+//         }
+//     }
+// }
