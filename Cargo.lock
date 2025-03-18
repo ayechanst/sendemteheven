@@ -560,6 +560,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_ecs_tiled"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3c83101ffb04b2ade1b2996fb430bd279b38b4a55c6503b1ab2e13e49ade03b"
+dependencies = [
+ "bevy",
+ "bevy_ecs_tilemap",
+ "futures-lite",
+ "log",
+ "thiserror",
+ "tiled",
+]
+
+[[package]]
 name = "bevy_ecs_tilemap"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3551,6 +3565,7 @@ name = "senedteheven"
 version = "0.6.0"
 dependencies = [
  "bevy",
+ "bevy_ecs_tiled",
  "bevy_ecs_tilemap",
  "tiled",
 ]

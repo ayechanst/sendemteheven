@@ -14,9 +14,6 @@ pub struct Player {
     pub speed: f32,
 }
 
-// #[derive(Component)]
-// struct Speed(f32);
-
 fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     let texture = asset_server.load("assassino.png");
     commands.spawn((
