@@ -7,4 +7,5 @@ version = "0.6.0"
 bevy = { version = "0.15", default-features = true }
 bevy_ecs_tiled = "0.6"
 bevy_ecs_tilemap = { version = "0.15", default-features = true }
+bevy_rapier2d = "0.29.0"
 tiled = { version = "0.14", features = ["world"] }
