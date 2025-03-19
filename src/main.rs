@@ -15,17 +15,22 @@ fn main() {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let map_handle: Handle<TiledMap> = asset_server.load("test2.tmx");
+    let tile_width = 32.0;
+    let tile_height = 16.0;
+    let map_handle: Handle<TiledMap> = asset_server.load("right-up.tmx");
 
     // commands.spawn((TiledMapHandle(map_handle), TiledMapAnchor::Center));
-    for layer_index in 0..3 {
-        commands.spawn((
-            TiledMapHandle(map_handle.clone()),
-            TiledMapLayer,
-            Transform::from_xyz(0.0, 0.0, layer_index as f32),
-            Visibility::Visible,
-            TiledMapAnchor::Center,
-        ));
-    }
+    commands.spawn((
+        // Tuple of bundles, such as TiledMapLayer and Visibility
+        // The tuple IS the entity
+        TiledMapHandle(map_handle.clone()),
+        TiledMapLayerZOffset(1.0),
+        TilemapRenderSettings {
+            render_chunk_size: UVec2::new(64, 1),
+            y_sort: true,
+        },
+        // Visibility::Visible,
+        TiledMapAnchor::Center,
+    ));
     commands.spawn(Camera2d);
 }
