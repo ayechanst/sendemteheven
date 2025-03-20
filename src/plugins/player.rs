@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -16,22 +18,53 @@ pub struct Player {
     pub is_moving: bool,
 }
 
+#[derive(Component)]
+struct AnimationConfig {
+    first_sprite_index: usize,
+    last_sprite_index: usize,
+    fps: u8,
+    frame_timer: Timer,
+}
+
+impl AnimationConfig {
+    fn new(first: usize, last: usize, fps: u8) -> Self {
+        Self {
+            first_sprite_index: first,
+            last_sprite_index: last,
+            fps,
+            frame_timer: Self::timer_from_fps(fps),
+        }
+    }
+
+    fn timer_from_fps(fps: u8) -> Timer {
+        Timer::new(Duration::from_secs_f32(1.0 / (fps as f32)), TimerMode::Once)
+    }
+}
+
 fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlas_layout: ResMut<Assets<TextureAtlasLayout>>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let frame_textures: Vec<Handle<Image>> = (1..=11)
-        .map(|i| asset_server.load(format!("animated-assassino-export{}.png", i)))
-        .collect();
-    // let texture_atlas = TextureAtlasLayout::add_texture(&mut self, rect)
+    let walk_texture: Handle<Image> = asset_server.load("walking-assassino.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 5, 1, None, None);
+    let texture_atlas_layout = texture_atlas_layouts.add(layout);
+    // let idle_texture = asset_server.load("assassino.png");
+    let animation_config_1 = AnimationConfig::new(0, 4, 2);
 
-    let texture = asset_server.load("assassino.png");
     commands.spawn((
         Sprite {
-            image: texture,
+            image: walk_texture.clone(),
+            texture_atlas: Some(TextureAtlas {
+                layout: texture_atlas_layout.clone(),
+                index: animation_config_1.first_sprite_index,
+            }),
             ..default()
         },
+        // Sprite {
+        //     image: texture,
+        //     ..default()
+        // },
         // RigidBody::Dynamic,
         Collider::capsule_y(15.0, 30.0),
         Player {
