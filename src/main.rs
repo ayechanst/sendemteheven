@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tiled::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_rapier2d::prelude::*;
 use plugins::player::PlayerPlugin;
 mod plugins;
 
@@ -10,17 +11,15 @@ fn main() {
         .add_plugins(TilemapPlugin)
         .add_plugins(TiledMapPlugin::default())
         .add_plugins(PlayerPlugin)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_systems(Startup, setup)
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // let map_handle: Handle<TiledMap> = asset_server.load("right-up.tmx");
     commands.spawn((
-        // Tuple of bundles, such as TiledMapLayer and Visibility
-        // The tuple IS the entity
-        // TiledMapHandle(map_handle.clone()),
         TiledMapHandle(asset_server.load("right-up.tmx")),
+        RigidBody::Fixed,
         TilemapRenderSettings {
             render_chunk_size: UVec2::new(64, 1),
             y_sort: true,
