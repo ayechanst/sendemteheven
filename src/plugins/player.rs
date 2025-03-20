@@ -1,4 +1,4 @@
-use bevy::{input::mouse::MouseMotion, prelude::*};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 pub struct PlayerPlugin;
@@ -13,62 +13,52 @@ impl Plugin for PlayerPlugin {
 #[derive(Component)]
 pub struct Player {
     pub speed: f32,
+    pub is_moving: bool,
 }
 
-fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_player(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layout: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    let frame_textures: Vec<Handle<Image>> = (1..=11)
+        .map(|i| asset_server.load(format!("animated-assassino-export{}.png", i)))
+        .collect();
+    // let texture_atlas = TextureAtlasLayout::add_texture(&mut self, rect)
+
     let texture = asset_server.load("assassino.png");
     commands.spawn((
         Sprite {
             image: texture,
             ..default()
         },
-        RigidBody::Dynamic,
+        // RigidBody::Dynamic,
         Collider::capsule_y(15.0, 30.0),
-        Player { speed: 100.0 },
+        Player {
+            speed: 100.0,
+            is_moving: false,
+        },
     ));
 }
 
 fn character_movement(
     mut characters: Query<(&mut Transform, &Player)>,
-    mut mouse_motion_events: EventReader<MouseMotion>,
+    input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
-    for mouse_event in mouse_motion_events.read() {
-        let mouse_delta = mouse_event.delta;
-        for (mut transform, player) in &mut characters {
-            let player_pos = transform.translation.truncate();
-            let direction = mouse_delta - player_pos;
-            let distance = direction.length();
-            let stop_distance = 50.0;
-            if distance < stop_distance {
-                continue;
-            }
-            let speed_factor = distance / 100.0;
-            let movement_amount = player.speed * speed_factor * time.delta_secs();
-            let direction_normalized = direction.normalize();
-            transform.translation.x += direction_normalized.x * movement_amount;
-            transform.translation.y += direction_normalized.y * movement_amount;
+    for (mut transform, player) in &mut characters {
+        let movement_amount = player.speed * time.delta_secs();
+        if input.pressed(KeyCode::KeyW) {
+            transform.translation.y += movement_amount;
+        }
+        if input.pressed(KeyCode::KeyS) {
+            transform.translation.y -= movement_amount;
+        }
+        if input.pressed(KeyCode::KeyD) {
+            transform.translation.x += movement_amount;
+        }
+        if input.pressed(KeyCode::KeyA) {
+            transform.translation.x -= movement_amount;
         }
     }
 }
-// fn character_movement(
-//     mut characters: Query<(&mut Transform, &Player)>,
-//     input: Res<ButtonInput<KeyCode>>,
-//     time: Res<Time>,
-// ) {
-//     for (mut transform, player) in &mut characters {
-//         let movement_amount = player.speed * time.delta_secs();
-//         if input.pressed(KeyCode::KeyW) {
-//             transform.translation.y += movement_amount;
-//         }
-//         if input.pressed(KeyCode::KeyS) {
-//             transform.translation.y -= movement_amount;
-//         }
-//         if input.pressed(KeyCode::KeyD) {
-//             transform.translation.x += movement_amount;
-//         }
-//         if input.pressed(KeyCode::KeyA) {
-//             transform.translation.x -= movement_amount;
-//         }
-//     }
-// }
