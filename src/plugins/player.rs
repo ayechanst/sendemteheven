@@ -1,7 +1,6 @@
-use std::time::Duration;
-
-use bevy::{math::VectorSpace, prelude::*, reflect::Enum};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use std::time::Duration;
 
 pub struct PlayerPlugin;
 
@@ -110,12 +109,16 @@ fn update_player_direction(mut query: Query<&mut Player>, input: Res<ButtonInput
         let left = input.pressed(KeyCode::KeyA);
 
         if up && right {
+            println!("Player Direction: {:?}", player.direction);
             player.direction = Direction::UpRight;
         } else if left && up {
+            println!("Player Direction: {:?}", player.direction);
             player.direction = Direction::UpLeft;
         } else if down && right {
+            println!("Player Direction: {:?}", player.direction);
             player.direction = Direction::DownRight;
         } else if down && left {
+            println!("Player Direction: {:?}", player.direction);
             player.direction = Direction::DownLeft;
         }
     }
@@ -142,7 +145,7 @@ fn character_movement(
         }
         if input.pressed(KeyCode::KeyA) {
             // transform.translation.x -= movement_amount;
-            direction_vec.x += 1.0;
+            direction_vec.x -= 1.0;
         }
         if direction_vec != Vec2::ZERO {
             player.is_moving = true;

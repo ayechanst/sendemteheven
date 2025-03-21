@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tiled::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 use plugins::player::PlayerPlugin;
 mod plugins;
@@ -12,6 +13,7 @@ fn main() {
         .add_plugins(TiledMapPlugin::default())
         .add_plugins(PlayerPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugins(WorldInspectorPlugin::new())
         .add_systems(Startup, setup)
         .run();
 }
