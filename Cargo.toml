@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "senedteheven"
+name = "sendemteheven"
 version = "0.6.0"
 
 [dependencies]
@@ -8,5 +8,6 @@ bevy = { version = "0.15", default-features = true }
 bevy-inspector-egui = "0.30.0"
 bevy_ecs_tiled = "0.6"
 bevy_ecs_tilemap = { version = "0.15", default-features = true }
-bevy_rapier2d = "0.29.0"
+# bevy_rapier2d = { version = "0.29.0", features = ["simd-stable", "debug-render"] }
+bevy_rapier2d = "0.29.0" 
 tiled = { version = "0.14", features = ["world"] }

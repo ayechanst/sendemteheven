@@ -61,7 +61,7 @@ fn spawn_player(
             ..default()
         },
         // RigidBody::Dynamic,
-        Collider::capsule_y(15.0, 30.0),
+        Collider::capsule_y(5.0, 7.0),
         Player {
             speed: 50.0,
             is_moving: false,

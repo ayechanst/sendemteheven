@@ -15,13 +15,17 @@ fn main() {
         .add_plugins(PlayerPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(WorldInspectorPlugin::new())
+        .add_plugins(RapierDebugRenderPlugin::default())
         .add_systems(Startup, setup)
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let handle: Handle<TiledMap> = asset_server.load("map-v3.tmx");
+
     commands.spawn((
-        TiledMapHandle(asset_server.load("map-v3.tmx")),
+        // TiledMapHandle(asset_server.load("map-v3.tmx")),
+        TiledMapHandle(handle),
         RigidBody::Fixed,
         // Collider::ball(50.5),
         TilemapRenderSettings {
