@@ -22,19 +22,19 @@ pub struct Player {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Direction {
-    DownRight,
-    DownLeft,
-    UpRight,
-    UpLeft,
+    Up,
+    Down,
+    Right,
+    Left,
 }
 
 impl Direction {
     fn sprite_row(&self) -> usize {
         match self {
-            Direction::DownRight => 0,
-            Direction::DownLeft => 1,
-            Direction::UpRight => 2,
-            Direction::UpLeft => 3,
+            Direction::Up => 0,
+            Direction::Down => 1,
+            Direction::Right => 2,
+            Direction::Left => 3,
         }
     }
 }
@@ -65,7 +65,7 @@ impl AnimationConfig {
     }
 }
 
-const COLUMNS: usize = 1;
+const ROWS: usize = 2;
 
 fn spawn_player(
     mut commands: Commands,
@@ -73,8 +73,8 @@ fn spawn_player(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let texture_handle: Handle<Image> = asset_server.load("walking-assassino.png");
-    // let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), COLUMNS as u32, 1, None, None);
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 5, 1, None, None);
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 5, ROWS as u32, None, None);
+    // let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 5, 1, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let animation_config_1 = AnimationConfig::new(0, 4, 4);
 
@@ -92,7 +92,7 @@ fn spawn_player(
         Player {
             speed: 50.0,
             is_moving: false,
-            direction: Direction::DownRight,
+            direction: Direction::Down,
         },
         animation_config_1,
         AnimationTimer(Timer::new(
@@ -102,6 +102,8 @@ fn spawn_player(
     ));
 }
 
+// left direction
+// up direction
 fn animate_player(mut query: Query<(&mut AnimationConfig, &Player, &mut Sprite)>, time: Res<Time>) {
     for (mut config, player, mut sprite) in &mut query {
         config.frame_timer.tick(time.delta());
@@ -134,19 +136,19 @@ fn character_movement(
         let mut direction_vec = Vec2::ZERO;
         if input.pressed(KeyCode::KeyW) {
             direction_vec.y += 1.0;
-            player.direction = Direction::UpRight;
+            player.direction = Direction::Up;
         }
         if input.pressed(KeyCode::KeyS) {
             direction_vec.y -= 1.0;
-            player.direction = Direction::DownRight;
+            player.direction = Direction::Down;
         }
         if input.pressed(KeyCode::KeyD) {
             direction_vec.x += 1.0;
-            player.direction = Direction::DownLeft;
+            player.direction = Direction::Right;
         }
         if input.pressed(KeyCode::KeyA) {
             direction_vec.x -= 1.0;
-            player.direction = Direction::DownLeft;
+            player.direction = Direction::Left;
         }
         if direction_vec != Vec2::ZERO {
             player.is_moving = true;

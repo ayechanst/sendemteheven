@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy::prelude::*;
 use bevy_ecs_tiled::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
@@ -38,7 +38,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Transform {
             translation: Vec3::new(0.0, 0.0, 100.0), // Center the camera (at origin in this case)
-            scale: Vec3::splat(0.5),                 // Zoom in 50% (reduce the area covered)
+            scale: Vec3::splat(0.75),                // Zoom in 50% (reduce the area covered)
             ..Default::default()
         },
     ));
