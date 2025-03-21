@@ -6,10 +6,10 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_player).add_systems(
-            Update,
-            (character_movement, update_player_direction, animate_player),
-        );
+        app.add_systems(Startup, spawn_player)
+            .add_systems(Update, character_movement)
+            // .add_systems(Update, update_player_direction)
+            .add_systems(Update, animate_player);
     }
 }
 
@@ -101,6 +101,38 @@ fn spawn_player(
     ));
 }
 
+fn animate_player(mut query: Query<(&mut AnimationConfig, &Player, &mut Sprite)>, time: Res<Time>) {
+    for (mut config, player, mut sprite) in &mut query {
+        config.frame_timer.tick(time.delta());
+
+        if player.is_moving {
+            if config.frame_timer.just_finished() {
+                if let Some(atlas) = &mut sprite.texture_atlas {
+                    atlas.index = if atlas.index >= config.last_sprite_index {
+                        config.first_sprite_index
+                    } else {
+                        atlas.index + 1
+                    };
+                    config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
+                    // config.frame_timer.reset();
+                    // if atlas.index == config.last_sprite_index {
+                    //     atlas.index = config.first_sprite_index;
+                    // } else {
+                    //     atlas.index += 1;
+                    //     config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
+                    // }
+                }
+            }
+        } else {
+            // let row = player.direction.sprite_row();
+            // sprite.texture_atlas.clone().unwrap().index = row * COLUMNS;
+            if let Some(atlas) = &mut sprite.texture_atlas {
+                atlas.index = config.first_sprite_index;
+            }
+        }
+    }
+}
+
 fn update_player_direction(mut query: Query<&mut Player>, input: Res<ButtonInput<KeyCode>>) {
     for mut player in query.iter_mut() {
         let up = input.pressed(KeyCode::KeyW);
@@ -109,18 +141,15 @@ fn update_player_direction(mut query: Query<&mut Player>, input: Res<ButtonInput
         let left = input.pressed(KeyCode::KeyA);
 
         if up && right {
-            println!("Player Direction: {:?}", player.direction);
             player.direction = Direction::UpRight;
         } else if left && up {
-            println!("Player Direction: {:?}", player.direction);
             player.direction = Direction::UpLeft;
         } else if down && right {
-            println!("Player Direction: {:?}", player.direction);
             player.direction = Direction::DownRight;
         } else if down && left {
-            println!("Player Direction: {:?}", player.direction);
             player.direction = Direction::DownLeft;
         }
+        println!("Player Direction: {:?}", player.direction);
     }
 }
 
@@ -132,20 +161,24 @@ fn character_movement(
     for (mut transform, mut player) in query.iter_mut() {
         let mut direction_vec = Vec2::ZERO;
         if input.pressed(KeyCode::KeyW) {
-            // transform.translation.y += movement_amount;
             direction_vec.y += 1.0;
+            player.is_moving = true;
+            player.direction = Direction::UpRight;
         }
         if input.pressed(KeyCode::KeyS) {
-            // transform.translation.y -= movement_amount;
             direction_vec.y -= 1.0;
+            player.is_moving = true;
+            player.direction = Direction::DownRight;
         }
         if input.pressed(KeyCode::KeyD) {
-            // transform.translation.x += movement_amount;
             direction_vec.x += 1.0;
+            player.is_moving = true;
+            player.direction = Direction::DownLeft;
         }
         if input.pressed(KeyCode::KeyA) {
-            // transform.translation.x -= movement_amount;
             direction_vec.x -= 1.0;
+            player.is_moving = true;
+            player.direction = Direction::DownLeft;
         }
         if direction_vec != Vec2::ZERO {
             player.is_moving = true;
@@ -155,27 +188,6 @@ fn character_movement(
         } else {
             player.is_moving = false
         }
-    }
-}
-
-fn animate_player(mut query: Query<(&mut AnimationConfig, &Player, &mut Sprite)>, time: Res<Time>) {
-    for (mut config, player, mut sprite) in &mut query {
-        config.frame_timer.tick(time.delta());
-
-        if player.is_moving {
-            if config.frame_timer.just_finished() {
-                if let Some(atlas) = &mut sprite.texture_atlas {
-                    if atlas.index == config.last_sprite_index {
-                        atlas.index = config.first_sprite_index;
-                    } else {
-                        atlas.index += 1;
-                        config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
-                    }
-                }
-            }
-        } else {
-            let row = player.direction.sprite_row();
-            sprite.texture_atlas.clone().unwrap().index = row * COLUMNS;
-        }
+        println!("Player Direction: {:?}", player.direction);
     }
 }
