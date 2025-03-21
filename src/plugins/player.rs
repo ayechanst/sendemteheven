@@ -7,9 +7,9 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
-            .add_systems(Update, character_movement)
-            // .add_systems(Update, update_player_direction)
-            .add_systems(Update, animate_player);
+            .add_systems(Update, animate_player)
+            .add_systems(Update, character_movement);
+        // .add_systems(Update, update_player_direction)
     }
 }
 
@@ -95,7 +95,7 @@ fn spawn_player(
         },
         animation_config_1,
         AnimationTimer(Timer::new(
-            Duration::from_secs_f32(0.1),
+            Duration::from_secs_f32(1.0),
             TimerMode::Repeating,
         )),
     ));
@@ -106,50 +106,32 @@ fn animate_player(mut query: Query<(&mut AnimationConfig, &Player, &mut Sprite)>
         config.frame_timer.tick(time.delta());
 
         if player.is_moving {
-            if config.frame_timer.just_finished() {
+            // println!("Player.is_moving condition reached");
+            // if config.frame_timer.just_finished() {
+            if config.frame_timer.finished() {
+                println!("SUCCESS: config framer timer just finished condition");
                 if let Some(atlas) = &mut sprite.texture_atlas {
+                    println!("Atlas found! Current index: {}", atlas.index);
                     atlas.index = if atlas.index >= config.last_sprite_index {
                         config.first_sprite_index
                     } else {
                         atlas.index + 1
                     };
-                    config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
-                    // config.frame_timer.reset();
-                    // if atlas.index == config.last_sprite_index {
-                    //     atlas.index = config.first_sprite_index;
-                    // } else {
-                    //     atlas.index += 1;
-                    //     config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
-                    // }
+                } else {
+                    println!("NO TEXTURE ATLAS FOUND FOR PLAYER SPRITE!");
                 }
+                config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
+            } else {
+                // println!("FAILED: config.frame_timer: {:?}", config.frame_timer);
             }
         } else {
             // let row = player.direction.sprite_row();
             // sprite.texture_atlas.clone().unwrap().index = row * COLUMNS;
+            // println!("Player.is_moving condition FALSE");
             if let Some(atlas) = &mut sprite.texture_atlas {
                 atlas.index = config.first_sprite_index;
             }
         }
-    }
-}
-
-fn update_player_direction(mut query: Query<&mut Player>, input: Res<ButtonInput<KeyCode>>) {
-    for mut player in query.iter_mut() {
-        let up = input.pressed(KeyCode::KeyW);
-        let down = input.pressed(KeyCode::KeyS);
-        let right = input.pressed(KeyCode::KeyD);
-        let left = input.pressed(KeyCode::KeyA);
-
-        if up && right {
-            player.direction = Direction::UpRight;
-        } else if left && up {
-            player.direction = Direction::UpLeft;
-        } else if down && right {
-            player.direction = Direction::DownRight;
-        } else if down && left {
-            player.direction = Direction::DownLeft;
-        }
-        println!("Player Direction: {:?}", player.direction);
     }
 }
 
@@ -162,22 +144,18 @@ fn character_movement(
         let mut direction_vec = Vec2::ZERO;
         if input.pressed(KeyCode::KeyW) {
             direction_vec.y += 1.0;
-            player.is_moving = true;
             player.direction = Direction::UpRight;
         }
         if input.pressed(KeyCode::KeyS) {
             direction_vec.y -= 1.0;
-            player.is_moving = true;
             player.direction = Direction::DownRight;
         }
         if input.pressed(KeyCode::KeyD) {
             direction_vec.x += 1.0;
-            player.is_moving = true;
             player.direction = Direction::DownLeft;
         }
         if input.pressed(KeyCode::KeyA) {
             direction_vec.x -= 1.0;
-            player.is_moving = true;
             player.direction = Direction::DownLeft;
         }
         if direction_vec != Vec2::ZERO {
@@ -185,9 +163,31 @@ fn character_movement(
             direction_vec = direction_vec.normalize();
             let movement_amount = player.speed * time.delta_secs();
             transform.translation += direction_vec.extend(0.0) * movement_amount;
+            // println!("player is moving");
         } else {
-            player.is_moving = false
+            player.is_moving = false;
+            // println!("player is NOT moving");
         }
-        println!("Player Direction: {:?}", player.direction);
+        // println!("Player Direction: {:?}", player.direction);
     }
 }
+
+// fn update_player_direction(mut query: Query<&mut Player>, input: Res<ButtonInput<KeyCode>>) {
+//     for mut player in query.iter_mut() {
+//         let up = input.pressed(KeyCode::KeyW);
+//         let down = input.pressed(KeyCode::KeyS);
+//         let right = input.pressed(KeyCode::KeyD);
+//         let left = input.pressed(KeyCode::KeyA);
+
+//         if up && right {
+//             player.direction = Direction::UpRight;
+//         } else if left && up {
+//             player.direction = Direction::UpLeft;
+//         } else if down && right {
+//             player.direction = Direction::DownRight;
+//         } else if down && left {
+//             player.direction = Direction::DownLeft;
+//         }
+//         println!("Player Direction: {:?}", player.direction);
+//     }
+// }
