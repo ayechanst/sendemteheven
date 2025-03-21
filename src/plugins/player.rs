@@ -31,10 +31,10 @@ pub enum Direction {
 impl Direction {
     fn sprite_row(&self) -> usize {
         match self {
-            Direction::Up => 0,
-            Direction::Down => 1,
-            Direction::Right => 2,
-            Direction::Left => 3,
+            Direction::Up => 2,
+            Direction::Down => 0,
+            Direction::Right => 0,
+            Direction::Left => 1,
         }
     }
 }
@@ -65,7 +65,7 @@ impl AnimationConfig {
     }
 }
 
-const ROWS: usize = 2;
+const COLUMNS: usize = 5;
 
 fn spawn_player(
     mut commands: Commands,
@@ -73,7 +73,7 @@ fn spawn_player(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let texture_handle: Handle<Image> = asset_server.load("walking-assassino.png");
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 5, ROWS as u32, None, None);
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 5, 3, None, None);
     // let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 5, 1, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let animation_config_1 = AnimationConfig::new(0, 4, 4);
@@ -107,12 +107,13 @@ fn spawn_player(
 fn animate_player(mut query: Query<(&mut AnimationConfig, &Player, &mut Sprite)>, time: Res<Time>) {
     for (mut config, player, mut sprite) in &mut query {
         config.frame_timer.tick(time.delta());
+        let row_offset = player.direction.sprite_row() * COLUMNS;
         if player.is_moving {
             if config.frame_timer.finished() {
                 if let Some(atlas) = &mut sprite.texture_atlas {
                     println!("Atlas found! Current index: {}", atlas.index);
-                    atlas.index = if atlas.index >= config.last_sprite_index {
-                        config.first_sprite_index
+                    atlas.index = if atlas.index >= row_offset + config.last_sprite_index {
+                        row_offset + config.first_sprite_index
                     } else {
                         atlas.index + 1
                     };
@@ -121,7 +122,7 @@ fn animate_player(mut query: Query<(&mut AnimationConfig, &Player, &mut Sprite)>
             }
         } else {
             if let Some(atlas) = &mut sprite.texture_atlas {
-                atlas.index = config.first_sprite_index;
+                atlas.index = row_offset + config.first_sprite_index;
             }
         }
     }
