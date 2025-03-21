@@ -4,6 +4,7 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 use plugins::player::PlayerPlugin;
+mod components;
 mod plugins;
 
 fn main() {
