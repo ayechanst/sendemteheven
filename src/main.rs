@@ -21,25 +21,21 @@ fn main() {
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
-        TiledMapHandle(asset_server.load("right-up.tmx")),
+        TiledMapHandle(asset_server.load("map-v3.tmx")),
         RigidBody::Fixed,
+        // Collider::ball(50.5),
         TilemapRenderSettings {
             render_chunk_size: UVec2::new(64, 1),
             y_sort: true,
         },
         TiledMapAnchor::Center,
     ));
-    // commands.spawn(Camera2d);
 
     commands.spawn((
         Camera2d,
-        Camera {
-            hdr: true, // HDR is required for the bloom effect
-            ..default()
-        },
         Transform {
             translation: Vec3::new(0.0, 0.0, 100.0), // Center the camera (at origin in this case)
-            scale: Vec3::splat(0.75),                // Zoom in 50% (reduce the area covered)
+            scale: Vec3::splat(0.5),                 // Zoom in: < number
             ..Default::default()
         },
     ));
