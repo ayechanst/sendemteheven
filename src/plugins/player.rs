@@ -73,9 +73,10 @@ fn spawn_player(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let texture_handle: Handle<Image> = asset_server.load("walking-assassino.png");
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), COLUMNS as u32, 1, None, None);
+    // let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), COLUMNS as u32, 1, None, None);
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 5, 1, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
-    let animation_config_1 = AnimationConfig::new(0, 4, 2);
+    let animation_config_1 = AnimationConfig::new(0, 4, 4);
 
     commands.spawn((
         Sprite {
@@ -89,7 +90,7 @@ fn spawn_player(
         // RigidBody::Dynamic,
         Collider::capsule_y(15.0, 30.0),
         Player {
-            speed: 100.0,
+            speed: 50.0,
             is_moving: false,
             direction: Direction::DownRight,
         },
@@ -104,12 +105,8 @@ fn spawn_player(
 fn animate_player(mut query: Query<(&mut AnimationConfig, &Player, &mut Sprite)>, time: Res<Time>) {
     for (mut config, player, mut sprite) in &mut query {
         config.frame_timer.tick(time.delta());
-
         if player.is_moving {
-            // println!("Player.is_moving condition reached");
-            // if config.frame_timer.just_finished() {
             if config.frame_timer.finished() {
-                println!("SUCCESS: config framer timer just finished condition");
                 if let Some(atlas) = &mut sprite.texture_atlas {
                     println!("Atlas found! Current index: {}", atlas.index);
                     atlas.index = if atlas.index >= config.last_sprite_index {
@@ -117,17 +114,10 @@ fn animate_player(mut query: Query<(&mut AnimationConfig, &Player, &mut Sprite)>
                     } else {
                         atlas.index + 1
                     };
-                } else {
-                    println!("NO TEXTURE ATLAS FOUND FOR PLAYER SPRITE!");
                 }
                 config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
-            } else {
-                // println!("FAILED: config.frame_timer: {:?}", config.frame_timer);
             }
         } else {
-            // let row = player.direction.sprite_row();
-            // sprite.texture_atlas.clone().unwrap().index = row * COLUMNS;
-            // println!("Player.is_moving condition FALSE");
             if let Some(atlas) = &mut sprite.texture_atlas {
                 atlas.index = config.first_sprite_index;
             }
