@@ -699,6 +699,7 @@ checksum = "c3c83101ffb04b2ade1b2996fb430bd279b38b4a55c6503b1ab2e13e49ade03b"
 dependencies = [
  "bevy",
  "bevy_ecs_tilemap",
+ "bevy_rapier2d",
  "futures-lite",
  "log",
  "thiserror",
