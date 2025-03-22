@@ -15,7 +15,7 @@ fn main() {
         .add_plugins(PlayerPlugin)
         // .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(TiledPhysicsPlugin::<TiledPhysicsRapierBackend>::default())
-        .add_plugins(PhysicsPlugins::default().with_length_unit(100.0))
+        // .add_plugins(PhysicsPlugins::default().with_length_unit(100.0))
         .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_systems(Startup, setup)
@@ -34,7 +34,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             y_sort: true,
         },
         TiledMapAnchor::Center,
-        TiledPh,
+        // TiledPhysicsSettings::<TiledPhysicsRapierBackend> {
+
+        // },
     ));
 
     commands.spawn((
